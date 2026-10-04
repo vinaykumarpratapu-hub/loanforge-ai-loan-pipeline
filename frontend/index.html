@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LoanForge — Loan application</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #F7F4ED;
+    --paper-raised: #FBF9F4;
+    --ink: #1B2A41;
+    --ink-soft: #2F4258;
+    --slate: #5B6B73;
+    --hairline: #D8D2C2;
+    --approve: #2F6B4F;
+    --approve-bg: #E6EFE9;
+    --reject: #8C3B2E;
+    --reject-bg: #F3E7E4;
+    --review: #A8761E;
+    --review-bg: #F3EBDA;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'IBM Plex Sans', sans-serif;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .page {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 56px 24px 80px;
+  }
+
+  header.masthead {
+    border-bottom: 2px solid var(--ink);
+    padding-bottom: 20px;
+    margin-bottom: 40px;
+  }
+
+  .masthead-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+  }
+
+  h1.wordmark {
+    font-family: 'Source Serif 4', serif;
+    font-size: 30px;
+    font-weight: 600;
+    margin: 0;
+    letter-spacing: -0.01em;
+  }
+
+  .masthead-meta {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: var(--slate);
+  }
+
+  .masthead-sub {
+    font-size: 15px;
+    color: var(--slate);
+    margin-top: 6px;
+  }
+
+  section.block {
+    margin-bottom: 36px;
+  }
+
+  h2.section-title {
+    font-family: 'Source Serif 4', serif;
+    font-size: 19px;
+    font-weight: 500;
+    margin: 0 0 4px;
+  }
+
+  p.section-note {
+    font-size: 13.5px;
+    color: var(--slate);
+    margin: 0 0 20px;
+  }
+
+  .row {
+    display: grid;
+    grid-template-columns: 180px 1fr;
+    align-items: center;
+    gap: 16px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--hairline);
+  }
+
+  .row label {
+    font-size: 14px;
+    color: var(--ink-soft);
+  }
+
+  .row input,
+  .row select {
+    width: 100%;
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 15px;
+    color: var(--ink);
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid transparent;
+    padding: 6px 2px;
+    outline: none;
+    text-align: right;
+  }
+
+  .row input:focus,
+  .row select:focus {
+    border-bottom: 1px solid var(--ink);
+  }
+
+  .row select {
+    text-align: right;
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%235B6B73'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: left center;
+    padding-left: 18px;
+  }
+
+  @media (max-width: 460px) {
+    .row { grid-template-columns: 1fr; gap: 4px; }
+    .row input, .row select { text-align: left; }
+    .row select { background-position: right center; padding-left: 2px; padding-right: 18px; }
+  }
+
+  .upload-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 0;
+    border-bottom: 1px solid var(--hairline);
+  }
+
+  .upload-label {
+    font-size: 14px;
+    color: var(--ink-soft);
+  }
+
+  .upload-hint {
+    font-size: 12.5px;
+    color: var(--slate);
+    margin-top: 2px;
+  }
+
+  .upload-btn {
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ink);
+    background: var(--paper-raised);
+    border: 1px solid var(--ink);
+    border-radius: 3px;
+    padding: 9px 16px;
+    cursor: pointer;
+    white-space: nowrap;
+    flex-shrink: 0;
+    margin-left: 16px;
+  }
+
+  .upload-btn:hover { background: var(--ink); color: var(--paper); }
+
+  .upload-btn.has-file {
+    background: var(--approve-bg);
+    border-color: var(--approve);
+    color: var(--approve);
+  }
+
+  input[type="file"] { display: none; }
+
+  button.submit {
+    width: 100%;
+    font-family: 'Source Serif 4', serif;
+    font-size: 17px;
+    font-weight: 500;
+    color: var(--paper);
+    background: var(--ink);
+    border: none;
+    border-radius: 3px;
+    padding: 16px;
+    cursor: pointer;
+    margin-top: 12px;
+  }
+
+  button.submit:hover { background: var(--ink-soft); }
+  button.submit:disabled { opacity: 0.5; cursor: wait; }
+
+  .error-msg {
+    font-size: 13px;
+    color: var(--reject);
+    margin-top: 10px;
+    display: none;
+  }
+
+  /* Result view */
+  #result { display: none; }
+
+  .stamp {
+    display: inline-block;
+    font-family: 'Source Serif 4', serif;
+    font-size: 22px;
+    font-weight: 600;
+    padding: 10px 20px;
+    border-radius: 3px;
+    letter-spacing: 0.01em;
+  }
+  .stamp.approve { background: var(--approve-bg); color: var(--approve); border: 1.5px solid var(--approve); }
+  .stamp.reject { background: var(--reject-bg); color: var(--reject); border: 1.5px solid var(--reject); }
+  .stamp.manual_review { background: var(--review-bg); color: var(--review); border: 1.5px solid var(--review); }
+
+  .result-summary {
+    font-size: 15px;
+    color: var(--ink-soft);
+    margin-top: 14px;
+  }
+
+  .result-section {
+    margin-top: 32px;
+  }
+
+  .result-section h3 {
+    font-family: 'Source Serif 4', serif;
+    font-size: 16px;
+    font-weight: 500;
+    margin: 0 0 10px;
+  }
+
+  ul.reason-list {
+    margin: 0;
+    padding-left: 18px;
+    font-size: 14px;
+    color: var(--ink-soft);
+  }
+  ul.reason-list li { margin-bottom: 6px; }
+
+  .trace-item {
+    display: grid;
+    grid-template-columns: 140px 1fr;
+    gap: 14px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--hairline);
+    font-size: 13.5px;
+  }
+  .trace-agent {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--slate);
+    text-transform: lowercase;
+    min-width: 0;
+    overflow-wrap: break-word;
+    line-height: 1.4;
+  }
+  @media (max-width: 460px) {
+    .trace-item { grid-template-columns: 1fr; gap: 4px; }
+  }
+  .trace-result { color: var(--ink-soft); }
+
+  .back-link {
+    display: inline-block;
+    margin-top: 32px;
+    font-size: 13.5px;
+    color: var(--slate);
+    cursor: pointer;
+    text-decoration: underline;
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header class="masthead">
+    <div class="masthead-row">
+      <h1 class="wordmark">LoanForge</h1>
+      <span class="masthead-meta" id="refNumber">REF — PENDING</span>
+    </div>
+    <div class="masthead-sub">Loan application — applicant intake form</div>
+  </header>
+
+  <form id="loanForm">
+
+    <section class="block">
+      <h2 class="section-title">Applicant details</h2>
+      <p class="section-note">Figures in rupees. Used to assess repayment capability.</p>
+
+      <div class="row"><label for="name">Full name</label><input id="name" name="name" type="text" required placeholder="As per ID"></div>
+      <div class="row"><label for="age">Age</label><input id="age" name="age" type="number" min="21" max="70" required></div>
+      <div class="row"><label for="monthly_income">Monthly income</label><input id="monthly_income" name="monthly_income" type="number" min="0" required placeholder="e.g. 65000"></div>
+      <div class="row"><label for="employment_years">Years employed</label><input id="employment_years" name="employment_years" type="number" step="0.1" min="0" required></div>
+      <div class="row"><label for="existing_emi">Existing monthly EMI</label><input id="existing_emi" name="existing_emi" type="number" min="0" value="0"></div>
+      <div class="row"><label for="credit_history_years">Credit history (years)</label><input id="credit_history_years" name="credit_history_years" type="number" step="0.1" min="0" required></div>
+      <div class="row"><label for="num_existing_loans">Existing loans</label><input id="num_existing_loans" name="num_existing_loans" type="number" min="0" value="0"></div>
+      <div class="row"><label for="savings_balance">Savings balance</label><input id="savings_balance" name="savings_balance" type="number" min="0" value="0"></div>
+      <div class="row">
+        <label for="past_defaults">Past default on record</label>
+        <select id="past_defaults" name="past_defaults">
+          <option value="0">No</option>
+          <option value="1">Yes</option>
+        </select>
+      </div>
+    </section>
+
+    <section class="block">
+      <h2 class="section-title">Loan requested</h2>
+      <p class="section-note">What you're applying for.</p>
+
+      <div class="row"><label for="loan_amount">Loan amount</label><input id="loan_amount" name="loan_amount" type="number" min="0" required placeholder="e.g. 500000"></div>
+      <div class="row">
+        <label for="loan_term_months">Term</label>
+        <select id="loan_term_months" name="loan_term_months">
+          <option value="12">12 months</option>
+          <option value="24">24 months</option>
+          <option value="36" selected>36 months</option>
+          <option value="48">48 months</option>
+          <option value="60">60 months</option>
+        </select>
+      </div>
+      <div class="row">
+        <label for="purpose">Purpose</label>
+        <select id="purpose" name="purpose">
+          <option value="personal">Personal</option>
+          <option value="home_improvement" selected>Home improvement</option>
+          <option value="vehicle">Vehicle</option>
+          <option value="education">Education</option>
+          <option value="medical">Medical</option>
+          <option value="business">Business</option>
+        </select>
+      </div>
+    </section>
+
+    <section class="block">
+      <h2 class="section-title">Documents</h2>
+      <p class="section-note">Clear photo or scan. Checked automatically before your application is scored.</p>
+
+      <div class="upload-row">
+        <div>
+          <div class="upload-label">ID proof</div>
+          <div class="upload-hint" id="idHint">No file selected</div>
+        </div>
+        <label class="upload-btn" id="idBtn" for="id_document">Upload</label>
+        <input type="file" id="id_document" name="id_document" accept="image/*" required>
+      </div>
+
+      <div class="upload-row">
+        <div>
+          <div class="upload-label">Income proof</div>
+          <div class="upload-hint" id="incomeHint">No file selected</div>
+        </div>
+        <label class="upload-btn" id="incomeBtn" for="income_document">Upload</label>
+        <input type="file" id="income_document" name="income_document" accept="image/*" required>
+      </div>
+    </section>
+
+    <button type="submit" class="submit" id="submitBtn">Submit application</button>
+    <div class="error-msg" id="errorMsg"></div>
+  </form>
+
+  <div id="result">
+    <div id="stamp" class="stamp"></div>
+    <div class="result-summary" id="resultSummary"></div>
+
+    <div class="result-section">
+      <h3>Reasoning</h3>
+      <ul class="reason-list" id="reasonList"></ul>
+    </div>
+
+    <div class="result-section">
+      <h3>Agent trace</h3>
+      <div id="traceList"></div>
+    </div>
+
+    <span class="back-link" id="backLink">Submit another application</span>
+  </div>
+
+</div>
+
+<script>
+  const API_URL = "http://127.0.0.1:8000/apply"; // UPDATE THIS to the deployed backend URL
+
+  function fileHint(input, hintEl, btnEl) {
+    input.addEventListener("change", () => {
+      if (input.files.length > 0) {
+        hintEl.textContent = input.files[0].name;
+        btnEl.textContent = "Replace";
+        btnEl.classList.add("has-file");
+      }
+    });
+  }
+  fileHint(document.getElementById("id_document"), document.getElementById("idHint"), document.getElementById("idBtn"));
+  fileHint(document.getElementById("income_document"), document.getElementById("incomeHint"), document.getElementById("incomeBtn"));
+
+  document.getElementById("refNumber").textContent = "REF — " + Math.random().toString(36).slice(2, 8).toUpperCase();
+
+  const form = document.getElementById("loanForm");
+  const submitBtn = document.getElementById("submitBtn");
+  const errorMsg = document.getElementById("errorMsg");
+
+  const STAMP_LABEL = {
+    approve: "Approved",
+    reject: "Rejected",
+    manual_review: "Manual review",
+  };
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    errorMsg.style.display = "none";
+    submitBtn.disabled = true;
+    submitBtn.textContent = "Processing…";
+
+    const formData = new FormData(form);
+
+    try {
+      const res = await fetch(API_URL, { method: "POST", body: formData });
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(text || ("Request failed with status " + res.status));
+      }
+      const data = await res.json();
+      renderResult(data);
+    } catch (err) {
+      errorMsg.textContent = "Could not submit application. " + err.message + " — is the LoanForge backend running?";
+      errorMsg.style.display = "block";
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = "Submit application";
+    }
+  });
+
+  function renderResult(data) {
+    form.style.display = "none";
+    document.getElementById("result").style.display = "block";
+
+    const stampEl = document.getElementById("stamp");
+    stampEl.textContent = STAMP_LABEL[data.decision] || data.decision;
+    stampEl.className = "stamp " + data.decision;
+
+    document.getElementById("resultSummary").textContent = data.summary;
+
+    const reasonList = document.getElementById("reasonList");
+    reasonList.innerHTML = "";
+    (data.reasons || []).forEach(r => {
+      const li = document.createElement("li");
+      li.textContent = r;
+      reasonList.appendChild(li);
+    });
+
+    const traceList = document.getElementById("traceList");
+    traceList.innerHTML = "";
+    (data.agent_trace || []).forEach(t => {
+      const row = document.createElement("div");
+      row.className = "trace-item";
+      row.innerHTML = `<div class="trace-agent">${t.agent}</div><div class="trace-result"><strong>${t.action}</strong><br>${t.result_summary}</div>`;
+      traceList.appendChild(row);
+    });
+  }
+
+  document.getElementById("backLink").addEventListener("click", () => {
+    document.getElementById("result").style.display = "none";
+    form.style.display = "block";
+    form.reset();
+    document.getElementById("idHint").textContent = "No file selected";
+    document.getElementById("incomeHint").textContent = "No file selected";
+    document.getElementById("idBtn").textContent = "Upload";
+    document.getElementById("incomeBtn").textContent = "Upload";
+    document.getElementById("idBtn").classList.remove("has-file");
+    document.getElementById("incomeBtn").classList.remove("has-file");
+    document.getElementById("refNumber").textContent = "REF — " + Math.random().toString(36).slice(2, 8).toUpperCase();
+  });
+</script>
+
+</body>
+</html>
