@@ -181,11 +181,16 @@ update it to the deployed backend URL before deploying the frontend (see below).
 
 1. **Push to GitHub** — `git init && git add . && git commit -m "..." && git remote add origin
    ... && git push`.
-2. **Backend (FastAPI + Tesseract):** deploy to a host that supports installing a system
-   package, not a serverless platform that can't — **Render** or **Railway** both work well.
-   - Add an `apt.txt` (Render) or equivalent build step containing `tesseract-ocr` so the system
-     binary is installed before the app starts.
-   - Set the start command to `uvicorn backend.main:app --host 0.0.0.0 --port $PORT`.
+2. **Backend (FastAPI + Tesseract) — deploy with Docker, not a native Python runtime.** Render's
+   (and most PaaS providers') native Python build environment has no way to install a system
+   package like `tesseract-ocr` before the app starts — only a Docker-based build can. This repo
+   includes a `Dockerfile` that installs Tesseract and OpenCV's shared-lib dependencies, then
+   installs the Python requirements:
+   - On Render: create a **Web Service**, pick **Docker** as the runtime/language (not Python),
+     point it at this repo, and select the **Free** instance type. Render detects the
+     `Dockerfile` automatically and builds the image — no separate build/start command needed,
+     since the Dockerfile's `CMD` already runs
+     `uvicorn backend.main:app --host 0.0.0.0 --port $PORT`.
    - Once live, note the backend's public URL.
 3. **Frontend (static file):** deploy `frontend/index.html` to GitHub Pages, Netlify, or Vercel
    — any static host works since there's no build step.
